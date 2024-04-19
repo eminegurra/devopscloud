@@ -14,66 +14,88 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import java.util.Collection;
 import java.util.Optional;
 
-/**
- * Created by IntelliJ IDEA.
- * Project : spring-boot-rest-api-postgresql
- * User: hendisantika
- * Email: hendisantika@gmail.com
- * Telegram : @hendisantika34
- * Date: 2019-01-18
- * Time: 22:07
- * To change this template use File | Settings | File Templates.
- */
 @RestController
 @RequestMapping("/api/books")
 public class BookRestController {
+
+    private static final Logger logger = LogManager.getLogger(BookRestController.class);
 
     @Autowired
     private BookRepository repository;
 
     @PostMapping
     public ResponseEntity<?> addBook(@RequestBody Book book) {
-        return new ResponseEntity<>(repository.save(book), HttpStatus.CREATED);
+        logger.info("User requested to add book: {}", book);
+        Book savedBook = repository.save(book);
+        logger.info("Book added: {}", savedBook);
+        return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<Collection<Book>> getAllBooks() {
-        return new ResponseEntity<>(repository.findAll(), HttpStatus.OK);
+        logger.info("User requested to fetch all books");
+        Collection<Book> books = repository.findAll();
+        logger.info("Fetched {} books", books.size());
+        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Book> getBookWithId(@PathVariable Long id) {
-        return new ResponseEntity<Book>(repository.findById(id).get(), HttpStatus.OK);
+        logger.info("User requested to fetch book with id: {}", id);
+        Optional<Book> book = repository.findById(id);
+        if (book.isPresent()) {
+            logger.info("Book found: {}", book.get());
+            return new ResponseEntity<>(book.get(), HttpStatus.OK);
+        } else {
+            logger.warn("Book not found with id: {}", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping(params = {"name"})
-    public ResponseEntity<Collection<Book>> findBookWithName(@RequestParam(value = "name") String name) {
-        return new ResponseEntity<>(repository.findByName(name), HttpStatus.OK);
+    public ResponseEntity<Collection<Book>> findBookWithName(@RequestParam String name) {
+        logger.info("User requested to search books with name: {}", name);
+        Collection<Book> books = repository.findByName(name);
+        logger.info("Found {} books with name: {}", books.size(), name);
+        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBookFromDB(@PathVariable("id") long id, @RequestBody Book book) {
-
+    public ResponseEntity<Book> updateBookFromDB(@PathVariable long id, @RequestBody Book book) {
+        logger.info("User requested to update book with id: {}", id);
         Optional<Book> currentBookOpt = repository.findById(id);
-        Book currentBook = currentBookOpt.get();
-        currentBook.setName(book.getName());
-        currentBook.setDescription(book.getDescription());
-        currentBook.setTags(book.getTags());
-
-        return new ResponseEntity<>(repository.save(currentBook), HttpStatus.OK);
+        if (currentBookOpt.isPresent()) {
+            Book currentBook = currentBookOpt.get();
+            currentBook.setName(book.getName());
+            currentBook.setDescription(book.getDescription());
+            currentBook.setTags(book.getTags());
+            Book updatedBook = repository.save(currentBook);
+            logger.info("Book updated: {}", updatedBook);
+            return new ResponseEntity<>(updatedBook, HttpStatus.OK);
+        } else {
+            logger.warn("Book not found with id: {}", id);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBookWithId(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBookWithId(@PathVariable Long id) {
+        logger.info("User requested to delete book with id: {}", id);
         repository.deleteById(id);
+        logger.info("Book deleted with id: {}", id);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping
-    public void deleteAllBooks() {
+    public ResponseEntity<Void> deleteAllBooks() {
+        logger.info("User requested to delete all books");
         repository.deleteAll();
+        logger.info("All books deleted");
+        return ResponseEntity.noContent().build();
     }
 }
