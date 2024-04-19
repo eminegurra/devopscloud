@@ -1,0 +1,20 @@
+# Spring Boot configuration
+spring:
+  # Database
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://manny.db.elephantsql.com/bkelkwbp
+    username: bkelkwbp
+    password: fWksxQgUzsU-l8SwYWFbkn_YqGHHOYs4
+  # JPA properties
+  jpa:
+    hibernate.ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+# Server configuration
+server:
+  port: 8080
+# Security configuration
+security:
+  user:
+    name: user
+password: user
