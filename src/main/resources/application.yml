@@ -13,8 +13,31 @@ spring:
 # Server configuration
 server:
   port: 8080
-# Security configuration
-security:
-  user:
-    name: user
 password: user
+# Security configuration
+spring.security.user.name: user
+
+
+# Log4j configuration
+logging:
+  level:
+    root: INFO
+  file:
+    name: logs/app.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  loggers:
+    file:
+      name: FILE
+  appenders:
+    file:
+      type: File
+      name: FILE
+      fileName: "${user.dir}/logs/app.log"
+      pattern: "${logging.pattern.file}"
+    console:
+      type: Console
+      name: STDOUT
+      layout:
+        pattern: "${logging.pattern.console}"
