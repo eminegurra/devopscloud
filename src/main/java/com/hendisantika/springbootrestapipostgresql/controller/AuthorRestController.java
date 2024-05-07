@@ -37,6 +37,9 @@ public class AuthorRestController {
 
     @Autowired
     private AuthorRepository repository;
+    public AuthorRestController(AuthorRepository repository) {
+        this.repository = repository;
+    }
 
     @PostMapping
     public ResponseEntity<?> addAuthor(@RequestBody Author author) {

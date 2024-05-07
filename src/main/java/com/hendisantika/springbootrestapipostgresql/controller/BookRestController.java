@@ -27,6 +27,9 @@ public class BookRestController {
 
     @Autowired
     private BookRepository repository;
+    public BookRestController(BookRepository repository) {
+        this.repository = repository;
+    }
 
     @PostMapping
     public ResponseEntity<?> addBook(@RequestBody Book book) {
